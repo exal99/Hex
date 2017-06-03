@@ -45,14 +45,6 @@ public class HexMain extends PApplet {
 		rows = 11;
 		cols = 11;
 		grid = new GameHexGrid(this, cols, rows);
-		/**
-		for (int row = 0; row < rows; row++) {
-			for (int col = 0; col < cols; col++) {
-				float x = sqrt(3)/2 * HEX_SIZE + (((row) * PApplet.sqrt(3)/2) + col * PApplet.sqrt(3)) * HexMain.HEX_SIZE;
-				float y =  HEX_SIZE + 1.5f * row * HexMain.HEX_SIZE;
-				grid.set(row, col, new Hexagon(this, x, y));
-			} 
-		}**/
 		row = 0;
 		col = 0;
 	}

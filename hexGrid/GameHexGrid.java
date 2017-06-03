@@ -89,25 +89,18 @@ public class GameHexGrid extends HexGrid<Hexagon> implements GameObject, Drawabl
 	
 	@Override
 	public void mouseWheel(int dir) {
-		float scale = 0.1f;
-		scaleTransformate(1 - dir*scale, applet.width / 2 - dx, applet.height/ 2 - dy);
-		if (dir > 0 ) {
-			//scaleTransformate(1 - scale);
-			HexMain.setHexSize( (int) Math.round(HexMain.getHexGridSize() * (1-scale)));
-			updatePos();
-			
-		}
-		else if (dir < 0 ) {
-			//scaleTransformate(1 + scale);
-			HexMain.setHexSize( (int) Math.round(HexMain.getHexGridSize() * (1+scale)));
+		// zoom out: dir > 0, factor = (1-scale)
+		// zoom  in: dir < 0, factor = (1+scale)
+		if (!(HexMain.getHexGridSize() < 45 && dir > 0) && !(HexMain.getHexGridSize() > 70 && dir < 0)) {
+			float scale = 0.1f;
+			scaleTransformate(1 - dir*scale, applet.width / 2 - dx, applet.height/ 2 - dy);
+			HexMain.setHexSize( (int) Math.round(HexMain.getHexGridSize() * (1- dir*scale)));
 			updatePos();
 		}
 		
 	}
 	
 	private void scaleTransformate(float scale, float startX, float startY) {
-		//float startX = applet.width / 2 - dx;
-		//float startY = applet.height/ 2 - dy;
 		
 		float transformX = scale*startX;
 		float transformY = scale*startY;
