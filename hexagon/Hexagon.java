@@ -35,6 +35,7 @@ public class Hexagon implements Drawable, GameObject {
 	
 	private void drawAt(float x, float y) {
 		applet.fill(color);
+		applet.noStroke();
 		applet.beginShape();
 		for (float angle = PApplet.HALF_PI + PApplet.PI / 3; angle > - (PApplet.PI + PApplet.PI/6); angle -= PApplet.PI / 3) {
 			applet.vertex(x + PApplet.cos(angle) * HexMain.getHexSize(), y - PApplet.sin(angle) * HexMain.getHexSize());

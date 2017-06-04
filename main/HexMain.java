@@ -45,6 +45,7 @@ public class HexMain extends PApplet {
 		rows = 11;
 		cols = 11;
 		grid = new GameHexGrid(this, cols, rows);
+		grid.setOffset(80, 30);
 		row = 0;
 		col = 0;
 	}
