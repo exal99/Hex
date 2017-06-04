@@ -9,6 +9,8 @@ public class HexMain extends PApplet {
 	
 	private static int HEX_SIZE = 48;
 	private static int HEX_GRID_SIZE = 50;
+	public static final float SQRT_3 = PApplet.sqrt(3);
+	public static final float SQRT_3_2 = PApplet.sqrt(3) / 2;
 	
 	private GameHexGrid grid;
 	
@@ -17,6 +19,7 @@ public class HexMain extends PApplet {
 	
 	private int clickTime;
 	private int pressX, pressY;
+	
 	
 	private boolean mouseDown;
 	
