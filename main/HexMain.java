@@ -1,6 +1,9 @@
 package main;
 
+import java.util.HashMap;
+
 import hexGrid.GameHexGrid;
+import hexGrid.GameHexGrid.Node;
 import hexagon.Hexagon;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
@@ -12,14 +15,21 @@ public class HexMain extends PApplet {
 	public static final float SQRT_3 = PApplet.sqrt(3);
 	public static final float SQRT_3_2 = PApplet.sqrt(3) / 2;
 	
+	public static final HashMap<Integer, Integer> PLAYER_COLOR;
+	static {
+		PLAYER_COLOR = new HashMap<Integer, Integer>();
+		PLAYER_COLOR.put(0, -256); // 255,255,0
+		PLAYER_COLOR.put(1, -16776961); // 0,0,255
+	}
+	
 	private GameHexGrid grid;
 	
-	private int row,  col;
 	private int rows, cols;
 	
 	private int clickTime;
 	private int pressX, pressY;
 	
+	private int currentPlayer;
 	
 	private boolean mouseDown;
 	
@@ -38,8 +48,6 @@ public class HexMain extends PApplet {
 	
 	@Override
 	public void settings() {
-		// width:  n * sqrt(3) + sqrt(3)/2
-		// height: 2n - (n-1)/2)
 		size(1200,800);
 	}
 	
@@ -49,29 +57,45 @@ public class HexMain extends PApplet {
 		cols = 11;
 		grid = new GameHexGrid(this, cols, rows);
 		grid.setOffset(80, 30);
-		row = 0;
-		col = 0;
+		currentPlayer = 0;
+	}
+	
+	public void nextPlayer() {
+		currentPlayer++;
+		currentPlayer%=2;
+		for (int col = 0; col < cols; col++) {
+			Node<Hexagon> path = grid.isPath(0, col, rows - 1, -1, PLAYER_COLOR.get(0));
+			if (path != null) {
+				retracePath(path);
+				return;
+			}
+		}
+		
+		for (int row = 0; row < rows; row++) {
+			Node<Hexagon> path = grid.isPath(row, 0, -1, cols - 1, PLAYER_COLOR.get(1));
+			if (path != null) {
+				retracePath(path);
+				return;
+			}
+		}
+	}
+	
+	private void retracePath(Node<Hexagon> origin) {
+		Node<Hexagon> current = origin;
+		while (current != null) {
+			current.val.setColor(color(0,255,0));
+			current = current.prev;
+		}
+	}
+	
+	public int currentPlayer() {
+		return currentPlayer;
 	}
 	
 	@Override
 	public void draw() {
-		// start: sqrt(3)/2, 1
 		background(51);
 		grid.draw();
-		if (frameCount % 10 == 0) {
-			grid.get(row, col).setColor(color(200,0,0));
-			for (Hexagon hex : grid.getNeighbor(row, col)) {
-				hex.setColor(color(200,0,0));
-			}
-			col++;
-			row += (col == cols) ? 1 : 0;
-			col %= cols;
-			row %= rows;
-			grid.get(row, col).setColor(color(0,0,200));
-			for (Hexagon hex : grid.getNeighbor(row, col)) {
-				hex.setColor(color(0,200,0));
-			}
-		}
 		if (clickTime != -1 && millis() - clickTime > 150) {
 			mouseDown = true;;
 		}
@@ -106,7 +130,7 @@ public class HexMain extends PApplet {
 	
 	@Override
 	public void mouseMoved() {
-		grid.mouseMove(mouseX, mouseX);
+		grid.mouseMove(mouseX, mouseY);
 	}
 	
 	@Override

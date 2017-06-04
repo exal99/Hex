@@ -11,12 +11,15 @@ public class Hexagon implements Drawable, GameObject {
 	private HexMain applet;
 	private int color;
 	private float x, y;
+	private boolean mouseOver;
+	private boolean taken;
 	
 	public Hexagon(HexMain applet, float x, float y) {
 		this.applet = applet;
 		color = applet.color(200,0,0);
 		this.x = x;
 		this.y = y;
+		mouseOver = false;
 	}
 
 	@Override
@@ -33,8 +36,20 @@ public class Hexagon implements Drawable, GameObject {
 		y = newY;
 	}
 	
+	public void setMouseOver(boolean val) {
+		mouseOver = val;
+	}
+	
+	public int getColor() {
+		return color;
+	}
+	
 	private void drawAt(float x, float y) {
-		applet.fill(color);
+		if (mouseOver && !taken) {
+			applet.fill(HexMain.PLAYER_COLOR.get(applet.currentPlayer()));
+		} else {
+			applet.fill(color);
+		}
 		applet.noStroke();
 		applet.beginShape();
 		for (float angle = PApplet.HALF_PI + PApplet.PI / 3; angle > - (PApplet.PI + PApplet.PI/6); angle -= PApplet.PI / 3) {
@@ -50,6 +65,16 @@ public class Hexagon implements Drawable, GameObject {
 
 	@Override
 	public boolean mousePress(int x, int y) {
+		boolean res = mouseOver(x, y);
+		if (res && !taken) {
+			setColor(HexMain.PLAYER_COLOR.get(applet.currentPlayer()));
+			taken = true;
+			applet.nextPlayer();
+		}
+		return res;
+	}
+	
+	public boolean mouseOver(int x, int y) {
 		if (PApplet.dist(x, y, this.x, this.y) > HexMain.getHexSize()) {
 			return false;
 		}
@@ -59,7 +84,6 @@ public class Hexagon implements Drawable, GameObject {
 			PVector p3 = new PVector(this.x,this.y);
 			PVector pt = new PVector(x, y);
 			if (pointInTriangle(pt, p1, p2, p3)) {
-				setColor(applet.color(100, 100, 100));
 				return true;
 			}
 		}

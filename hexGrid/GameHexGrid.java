@@ -1,5 +1,7 @@
 package hexGrid;
 
+import java.util.PriorityQueue;
+
 import hexagon.Hexagon;
 import main.HexMain;
 import objects.Drawable;
@@ -69,7 +71,7 @@ public class GameHexGrid extends HexGrid<Hexagon> implements GameObject, Drawabl
 	
 	private void drawTopLine() {
 		applet.noStroke();
-		applet.fill(255,255,0);
+		applet.fill(HexMain.PLAYER_COLOR.get(0));
 		applet.beginShape();
 		float yPadding = 5;
 		float targetY = -15;
@@ -90,7 +92,7 @@ public class GameHexGrid extends HexGrid<Hexagon> implements GameObject, Drawabl
 	
 	private void drawLeftLine() {
 		applet.noStroke();
-		applet.fill(0,0,255);
+		applet.fill(HexMain.PLAYER_COLOR.get(1));
 		applet.beginShape();
 		float xPadding = 2.5f;
 		float startY = -15;
@@ -119,7 +121,7 @@ public class GameHexGrid extends HexGrid<Hexagon> implements GameObject, Drawabl
 	
 	private void drawRightLine() {
 		applet.noStroke();
-		applet.fill(0,0,255);
+		applet.fill(HexMain.PLAYER_COLOR.get(1));
 		applet.beginShape();
 		float xPadding = 2.5f;
 		float startY = -15;
@@ -153,7 +155,7 @@ public class GameHexGrid extends HexGrid<Hexagon> implements GameObject, Drawabl
 	
 	private void drawBottomLine() {
 		applet.noStroke();
-		applet.fill(255,255,0);
+		applet.fill(HexMain.PLAYER_COLOR.get(0));
 		applet.beginShape();
 		float yPadding = 5;
 		float startY = -15;
@@ -180,6 +182,48 @@ public class GameHexGrid extends HexGrid<Hexagon> implements GameObject, Drawabl
 		applet.endShape(PApplet.CLOSE);
 		
 	}
+	
+	@SuppressWarnings("unchecked")
+	public Node<Hexagon> isPath(int fromRow, int fromCol, int toRow, int toCol, int playerColor) {
+		if (!HexMain.PLAYER_COLOR.containsValue(playerColor) || hexGrid[fromRow][fromCol].getColor() != playerColor) {
+			return null;
+		}
+		PriorityQueue<Node<Hexagon>> toLookAt = new PriorityQueue<Node<Hexagon>>();
+		Node<Hexagon>[][] hexGrid = new Node[height][width];
+		for (int row = 0; row < height; row++) {
+			for (int col = 0; col < width; col++) {
+				Node<Hexagon> node= new Node<Hexagon>(this.hexGrid[row][col], row, col);
+				if (row == fromRow && col == fromCol) {
+					node.dist = 0;
+				}
+				if (this.hexGrid[row][col].getColor() == playerColor){
+					toLookAt.add(node);
+					hexGrid[row][col] = node;
+				}
+			}
+		}
+		while (!toLookAt.isEmpty()) {
+			Node<Hexagon> current = toLookAt.poll();
+			if (current.dist != Integer.MAX_VALUE) {
+				if (current.row == toRow || current.col == toCol) {
+					return current;
+				}
+				
+				for (Node<Hexagon> neighbour : getNeighbours(current.row, current.col, hexGrid, GameHexGrid.Node.class)) {
+					int newDist = current.dist + 1;
+					if (newDist < neighbour.dist) {
+						toLookAt.remove(neighbour);
+						neighbour.dist = newDist;
+						neighbour.prev = current;
+						toLookAt.add(neighbour);
+					}
+				}
+			}
+		}
+
+		
+		return null;
+	}
 
 	@Override
 	public boolean mousePress(int x, int y) {
@@ -195,8 +239,15 @@ public class GameHexGrid extends HexGrid<Hexagon> implements GameObject, Drawabl
 
 	@Override
 	public void mouseMove(int newX, int newY) {
-		// TODO Auto-generated method stub
-		
+		for (Hexagon[] row : hexGrid) {
+			for (Hexagon cell : row) {
+				if (cell.mouseOver(Math.round(newX -dx), Math.round(newY - dy))) {
+					cell.setMouseOver(true);
+				} else {
+					cell.setMouseOver(false);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -231,6 +282,26 @@ public class GameHexGrid extends HexGrid<Hexagon> implements GameObject, Drawabl
 		
 		dx -= transformX - startX;
 		dy -= transformY - startY;
+	}
+	
+	public class Node<E> implements Comparable<Node<E>>{
+		int dist;
+		public Node<E> prev;
+		public E val;
+		int row,col;
+		
+		public Node(E value,int row, int col) {
+			val = value;
+			dist = Integer.MAX_VALUE;
+			prev = null;
+			this.row = row;
+			this.col = col;
+		}
+
+		@Override
+		public int compareTo(Node<E> o) {
+			return Integer.compare(dist, o.dist);
+		}
 	}
 
 }
